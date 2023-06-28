@@ -1,9 +1,9 @@
 import argparse
 
-import torch
-from diffusers import StableDiffusionPipeline
-
 def sd(args):
+    import torch
+    from diffusers import StableDiffusionPipeline
+
     # check if on mac and mps is available, fallback to cuda then cpu
     is_mac = False
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
