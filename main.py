@@ -29,7 +29,11 @@ def sd(args):
     print("### performing inference with args:")
     print("# model id: ", args.model)
     print("# prompt: ", args.prompt)
-    output = pipe(args.prompt)
+    print("# steps: ", args.steps)
+    output = pipe(
+        prompt=args.prompt,
+        num_inference_steps=int(args.steps)
+    )
 
     print("### saving image files")
     output.images[0].save("output_sd_15.png")
@@ -40,8 +44,9 @@ def main():
     subparsers = parser.add_subparsers()
 
     sd_parser = subparsers.add_parser('sd', help='the stable diffusion subcommand')
-    sd_parser.add_argument('-m', '--model', default="runwayml/stable-diffusion-v1-5", help='the model id to use')
-    sd_parser.add_argument('-p', '--prompt', default="a photo of an astronaut riding a horse on mars", help='the prompt to use')
+    sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
+    sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
+    sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps')
     sd_parser.set_defaults(func=sd)
 
     args = parser.parse_args()
