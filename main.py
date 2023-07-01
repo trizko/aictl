@@ -31,12 +31,16 @@ def sd(args):
     pipe = pipe.to(device)
 
     print("### performing inference with args:")
-    print("# model id: ", args.model)
-    print("# prompt: ", args.prompt)
-    print("# steps: ", args.steps)
+    print("# args: ", args)
     output = pipe(
         prompt=args.prompt,
-        num_inference_steps=int(args.steps)
+        num_inference_steps=args.steps,
+        negative_prompt=args.negative_prompt,
+        width=args.resolution.width,
+        height=args.resolution.height,
+        guidance_scale=args.cfg,
+        guidance_rescale=args.denoiser,
+        num_images_per_prompt=args.batch_size,
     )
 
     print("### saving image files")
@@ -54,8 +58,12 @@ def main():
     sd_parser = subparsers.add_parser('sd', help='the stable diffusion subcommand')
     sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
     sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
-    sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps')
+    sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
+    sd_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
     sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
+    sd_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
+    sd_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
+    sd_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
     sd_parser.add_argument('-o', '--output-path', default='output_sd_15.png', help='path for image output when generation is complete')
     sd_parser.set_defaults(func=sd)
 
