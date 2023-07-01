@@ -1,4 +1,8 @@
 import argparse
+from collections import namedtuple
+
+# define named tuple for the size of result image
+Size = namedtuple('Size', 'width height')
 
 def sd(args):
     import torch
@@ -36,7 +40,11 @@ def sd(args):
     )
 
     print("### saving image files")
-    output.images[0].save("output_sd_15.png")
+    output.images[0].save(args.output_path)
+
+def resolution_validation(x):
+    x = x.split('x')
+    return Size(int(x[0]), int(x[1]))
 
 def main():
     parser = argparse.ArgumentParser(description="A command-line interface for ai models")
@@ -47,6 +55,8 @@ def main():
     sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
     sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
     sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps')
+    sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
+    sd_parser.add_argument('-o', '--output-path', default='output_sd_15.png', help='path for image output when generation is complete')
     sd_parser.set_defaults(func=sd)
 
     args = parser.parse_args()
