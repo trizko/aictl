@@ -41,6 +41,7 @@ def sd(args):
         guidance_scale=args.cfg,
         guidance_rescale=args.denoiser,
         num_images_per_prompt=args.batch_size,
+        generator=torch.Generator(device="cpu").manual_seed(args.seed),
     )
 
     print("### saving image files")
@@ -58,6 +59,7 @@ def main():
     sd_parser = subparsers.add_parser('sd', help='the stable diffusion subcommand')
     sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
     sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
+    sd_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
     sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
     sd_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
     sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
