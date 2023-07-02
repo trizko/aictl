@@ -77,7 +77,7 @@ def scheduler_validation(sampler):
     elif sampler == 'eulera':
         return EulerAncestralDiscreteScheduler
 
-    return DDIMScheduler
+    return EulerAncestralDiscreteScheduler
 
 
 def main():
