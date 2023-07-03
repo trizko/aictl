@@ -12,4 +12,4 @@ torchvision
 torchaudio
 transformers
 uvicorn
-xformers @ git+https://github.com/jinmingyi1998/xformers@3e0f86d8be909a63055e117c82310252c350ce50
+xformers
