@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'aictl = aictl.cli.main:main',
+            'aictl2 = aictl.cli.main_v2:main',
         ],
     },
 )
