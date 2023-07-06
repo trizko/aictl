@@ -1,10 +1,18 @@
 import argparse
+import PIL
+import requests
 from collections import namedtuple
 
 # define named tuple for the size of result image
 Size = namedtuple('Size', 'width height')
 
-def sd(args):
+def download_image(url):
+    image = PIL.Image.open(requests.get(url, stream=True).raw)
+    image = PIL.ImageOps.exif_transpose(image)
+    image = image.convert("RGB")
+    return image
+
+def t2i(args):
     import torch
     from diffusers import StableDiffusionPipeline
 
@@ -48,11 +56,59 @@ def sd(args):
     print("### saving image files")
     output.images[0].save(args.output_path)
 
-def resolution_validation(x):
+def ip2p(args):
+    import torch
+    from diffusers import StableDiffusionInstructPix2PixPipeline
+
+    # check if on mac and mps is available, fallback to cuda then cpu
+    is_mac = False
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    if torch.backends.mps.is_available():
+        is_mac = True
+        device = torch.device("mps")
+        print("MPS device detected. Using MPS.")
+
+    # load models and configure pipeline settings
+    print("### loading models")
+    model_type = torch.float32 if is_mac else torch.float16
+    pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+        args.model,
+        torch_dtype=model_type,
+        safety_checker = None,
+        requires_safety_checker = False
+    )
+    pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
+    if is_mac:
+        pipe.enable_attention_slicing()
+    else:
+        pipe.enable_model_cpu_offload()
+        pipe.enable_xformers_memory_efficient_attention()
+    pipe = pipe.to(device)
+
+    if args.image is None:
+        image = download_image(args.image_url)
+    else:
+        image = PIL.Image.open(args.image)
+
+    print("### performing inference with args:")
+    print("# args: ", args)
+    output = pipe(
+        prompt=args.prompt,
+        image=image,
+        num_inference_steps=args.steps,
+        negative_prompt=args.negative_prompt,
+        image_guidance_scale=args.cfg,
+        generator=torch.Generator(device="cpu").manual_seed(args.seed),
+    )
+
+    print("### saving image files")
+    output.images[0].save(args.output_path)
+
+def resolution_validator(x):
     x = x.split('x')
     return Size(int(x[0]), int(x[1]))
 
-def scheduler_validation(sampler):
+def scheduler_validator(sampler):
     from diffusers import \
         LMSDiscreteScheduler, \
         DDIMScheduler, \
@@ -79,25 +135,37 @@ def scheduler_validation(sampler):
 
     return EulerAncestralDiscreteScheduler
 
-
 def main():
     parser = argparse.ArgumentParser(description="A command-line interface for ai models")
 
     subparsers = parser.add_subparsers()
 
-    sd_parser = subparsers.add_parser('sd', help='the stable diffusion subcommand')
-    sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
-    sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
-    sd_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
-    sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
-    sd_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
-    sd_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera', type=scheduler_validation)
-    sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
-    sd_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
-    sd_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
-    sd_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
-    sd_parser.add_argument('-o', '--output-path', default='output_sd_15.png', help='path for image output when generation is complete')
-    sd_parser.set_defaults(func=sd)
+    t2i_parser = subparsers.add_parser('t2i', help='the stable diffusion subcommand')
+    t2i_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
+    t2i_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
+    t2i_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
+    t2i_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
+    t2i_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
+    t2i_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera', type=scheduler_validator)
+    t2i_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validator)
+    t2i_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
+    t2i_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
+    t2i_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
+    t2i_parser.add_argument('-o', '--output-path', default='output_t2i.png', help='path for image output when generation is complete')
+    t2i_parser.set_defaults(func=t2i)
+
+    ip2p_parser = subparsers.add_parser('ip2p', help='the stable diffusion subcommand')
+    ip2p_parser.add_argument('-m', '--model', default='timbrooks/instruct-pix2pix', help='the model id to use')
+    ip2p_parser.add_argument('-p', '--prompt', default='turn him into cyborg', help='the instruction prompt to use')
+    ip2p_parser.add_argument('-i', '--image', default=None, help='the image to edit')
+    ip2p_parser.add_argument('-u', '--image-url', default='https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg', help='the image to edit')
+    ip2p_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
+    ip2p_parser.add_argument('-s', '--steps', default='10', help='number of generation steps', type=int)
+    ip2p_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
+    ip2p_parser.add_argument('-y', '--scheduler', default='eulera', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera', type=scheduler_validator)
+    ip2p_parser.add_argument('-c', '--cfg', default='1.0', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
+    ip2p_parser.add_argument('-o', '--output-path', default='output_ip2p.png', help='path for image output when generation is complete')
+    ip2p_parser.set_defaults(func=ip2p)
 
     args = parser.parse_args()
 
