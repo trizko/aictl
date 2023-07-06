@@ -8,13 +8,13 @@ import time
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from PIL import Image
-from typing import Optional
 
 import torch
 from controlnet_aux import HEDdetector
 from diffusers import StableDiffusionPipeline, UniPCMultistepScheduler
+
+from aictl.common.types import T2IConfig
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -66,17 +66,6 @@ async def load_model():
 # Dependency function that returns the model instance
 def get_model():
     return model
-
-class T2IConfig(BaseModel):
-    prompt: Optional[str] = 'a photo of an astronaut riding a horse on mars'
-    negative_prompt: Optional[str] = ''
-    steps: Optional[int] = 20
-    width: Optional[int] = 512
-    height: Optional[int] = 512
-    cfg: Optional[float] = 7.5
-    denoiser: Optional[float] = 0.7
-    batch_size: Optional[int] = 1
-    seed: Optional[int] = 420
 
 @app.post("/generate/")
 async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_model)):
