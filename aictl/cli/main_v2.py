@@ -1,12 +1,34 @@
 import argparse
+import base64
+import json
+import requests
 from collections import namedtuple
+
+from aictl.common.types import T2IConfig
 
 # define named tuple for the size of result image
 Size = namedtuple('Size', 'width height')
 
 def sd(args):
-    print(args)
-    pass
+    payload = T2IConfig(
+        prompt=args.prompt,
+        negative_prompt=args.negative_prompt,
+        steps=args.steps,
+        width=args.resolution.width,
+        height=args.resolution.height,
+        cfg=args.cfg,
+        denoiser=args.denoiser,
+        batch_size=args.batch_size,
+        seed=args.seed
+    )
+    response = requests.post('http://localhost:8000/generate/', json=payload.dict())
+    image_b64 = json.loads(response.text)['image']
+
+    with open(args.output_path, 'wb') as file:
+        file.write(base64.b64decode(image_b64))
+
+    print(f'Image successfully written to {args.output_path}')
+
 
 def resolution_validation(x):
     x = x.split('x')
