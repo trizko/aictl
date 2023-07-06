@@ -12,6 +12,12 @@ def download_image(url):
     image = image.convert("RGB")
     return image
 
+def load_image_from_path(path):
+    image = PIL.Image.open(path)
+    image = PIL.ImageOps.exif_transpose(image)
+    image = image.convert("RGB")
+    return image
+
 def t2i(args):
     import torch
     from diffusers import StableDiffusionPipeline
@@ -88,7 +94,7 @@ def ip2p(args):
     if args.image is None:
         image = download_image(args.image_url)
     else:
-        image = PIL.Image.open(args.image)
+        image = load_image_from_path(args.image)
 
     print("### performing inference with args:")
     print("# args: ", args)
@@ -157,8 +163,8 @@ def main():
     ip2p_parser = subparsers.add_parser('ip2p', help='the stable diffusion subcommand')
     ip2p_parser.add_argument('-m', '--model', default='timbrooks/instruct-pix2pix', help='the model id to use')
     ip2p_parser.add_argument('-p', '--prompt', default='turn him into cyborg', help='the instruction prompt to use')
-    ip2p_parser.add_argument('-i', '--image', default=None, help='the image to edit')
-    ip2p_parser.add_argument('-u', '--image-url', default='https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg', help='the image to edit')
+    ip2p_parser.add_argument('-i', '--image', default=None, help='the local image file to edit')
+    ip2p_parser.add_argument('-u', '--image-url', default='https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg', help='the url of the image to edit')
     ip2p_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
     ip2p_parser.add_argument('-s', '--steps', default='10', help='number of generation steps', type=int)
     ip2p_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
