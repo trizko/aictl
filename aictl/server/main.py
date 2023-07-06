@@ -67,7 +67,7 @@ async def load_model():
 def get_model():
     return model
 
-class GenRequest(BaseModel):
+class T2IConfig(BaseModel):
     prompt: Optional[str] = 'a photo of an astronaut riding a horse on mars'
     negative_prompt: Optional[str] = ''
     steps: Optional[int] = 20
@@ -79,7 +79,7 @@ class GenRequest(BaseModel):
     seed: Optional[int] = 420
 
 @app.post("/generate/")
-async def analyze_image(data: GenRequest, model_resource: Model = Depends(get_model)):
+async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_model)):
     # Get preprocessor, pipeline and lock
     pipe = model_resource.pipeline
     lock = model_resource.lock
