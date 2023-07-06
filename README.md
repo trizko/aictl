@@ -11,18 +11,18 @@ source venv/bin/activate
 pip install --upgrade pip
 
 # on Mac
-pip install -r requirements.txt --pre --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+pip install --pre --extra-index-url https://download.pytorch.org/whl/nightly/cpu .
 
 # on Linux
-pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu116
+pip install --extra-index-url https://download.pytorch.org/whl/cu116 .
 ```
 
 ## Usage
 Like the installation, usage of this tool will also depend on your platform:
 ```bash
 # on Mac
-PYTORCH_ENABLE_MPS_FALLBACK=1 python main.py
+PYTORCH_ENABLE_MPS_FALLBACK=1 aictl --help
 
 # on Linux
-python main.py
+aictl --help
 ```
