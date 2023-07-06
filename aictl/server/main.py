@@ -2,7 +2,6 @@ import asyncio
 import base64
 import io
 import json
-import logging
 import re
 import time
 
@@ -11,10 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 
 import torch
-from controlnet_aux import HEDdetector
 from diffusers import StableDiffusionPipeline, UniPCMultistepScheduler
 
+import logging
+from logging.config import dictConfig
+from .config import LogConfig
+
 from aictl.common.types import T2IConfig
+
+# Initialize logger
+dictConfig(LogConfig().dict())
+logger = logging.getLogger("aictl")
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -37,13 +43,13 @@ model = Model()
 
 @app.on_event("startup")
 async def load_model():
-    # Load the model during startup
+    logger.info('Loading models and configuration.')
     is_mac = False
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     if torch.backends.mps.is_available():
         is_mac = True
         device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
+        logger.info("MPS device detected. Using MPS.")
 
     model_type = torch.float32 if is_mac else torch.float16
     pipe = StableDiffusionPipeline.from_pretrained(
@@ -57,11 +63,11 @@ async def load_model():
         pipe.enable_model_cpu_offload()
         pipe.enable_xformers_memory_efficient_attention()
     pipe = pipe.to(device)
+    logger.info('Model finished loading.')
 
     # assign pipeline to model instance
     model.pipeline = pipe
 
-    print('model loaded and server listening...')
 
 # Dependency function that returns the model instance
 def get_model():
@@ -73,6 +79,7 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
     pipe = model_resource.pipeline
     lock = model_resource.lock
     async with lock:
+        logger.info('Performing inference.')
         output = pipe(
             prompt=data.prompt,
             num_inference_steps=data.steps,
@@ -84,6 +91,7 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
             num_images_per_prompt=data.batch_size,
             generator=torch.Generator(device="cpu").manual_seed(data.seed),
         )
+        logger.info('Inference complete.')
 
         buffer = io.BytesIO()
         output.images[0].save(buffer, format="JPEG")
