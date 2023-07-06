@@ -146,7 +146,7 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    t2i_parser = subparsers.add_parser('t2i', help='the stable diffusion subcommand')
+    t2i_parser = subparsers.add_parser('t2i', help='the text-to-image subcommand')
     t2i_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
     t2i_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
     t2i_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
@@ -160,7 +160,7 @@ def main():
     t2i_parser.add_argument('-o', '--output-path', default='output_t2i.png', help='path for image output when generation is complete')
     t2i_parser.set_defaults(func=t2i)
 
-    ip2p_parser = subparsers.add_parser('ip2p', help='the stable diffusion subcommand')
+    ip2p_parser = subparsers.add_parser('ip2p', help='the instruct-pix2pix subcommand')
     ip2p_parser.add_argument('-m', '--model', default='timbrooks/instruct-pix2pix', help='the model id to use')
     ip2p_parser.add_argument('-p', '--prompt', default='turn him into cyborg', help='the instruction prompt to use')
     ip2p_parser.add_argument('-i', '--image', default=None, help='the local image file to edit')
