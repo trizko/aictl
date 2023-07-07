@@ -34,33 +34,6 @@ def resolution_validation(x):
     x = x.split('x')
     return Size(int(x[0]), int(x[1]))
 
-def scheduler_validation(sampler):
-    from diffusers import \
-        LMSDiscreteScheduler, \
-        DDIMScheduler, \
-        DPMSolverMultistepScheduler, \
-        EulerDiscreteScheduler, \
-        PNDMScheduler, \
-        DDPMScheduler, \
-        EulerAncestralDiscreteScheduler
-
-    if sampler == 'lms':
-        return LMSDiscreteScheduler
-    elif sampler == 'ddim':
-        return DDIMScheduler
-    elif sampler == 'dpm':
-        return DPMSolverMultistepScheduler
-    elif sampler == 'euler':
-        return EulerDiscreteScheduler
-    elif sampler == 'pndm':
-        return PNDMScheduler
-    elif sampler == 'ddpm':
-        return DDPMScheduler
-    elif sampler == 'eulera':
-        return EulerAncestralDiscreteScheduler
-
-    return EulerAncestralDiscreteScheduler
-
 def start_server(args):
     print(args)
     pass
@@ -81,7 +54,7 @@ def main():
     sd_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
     sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
     sd_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
-    sd_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera', type=scheduler_validation)
+    sd_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera')
     sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
     sd_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
     sd_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
