@@ -12,7 +12,7 @@ from aictl.common.types import T2IConfig
 # define named tuple for the size of result image
 Size = namedtuple('Size', 'width height')
 
-def sd(args):
+def t2i(args):
     payload = T2IConfig(
         prompt=args.prompt,
         negative_prompt=args.negative_prompt,
@@ -91,19 +91,19 @@ def main():
     subparsers = parser.add_subparsers()
 
     # cli parser
-    sd_parser = subparsers.add_parser('sd', help='the stable diffusion subcommand')
-    sd_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
-    sd_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
-    sd_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
-    sd_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
-    sd_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
-    sd_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera')
-    sd_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
-    sd_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
-    sd_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
-    sd_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
-    sd_parser.add_argument('-o', '--output-path', default='output_sd_15.png', help='path for image output when generation is complete')
-    sd_parser.set_defaults(func=sd)
+    t2i_parser = subparsers.add_parser('t2i', help='the text-to-image subcommand')
+    t2i_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
+    t2i_parser.add_argument('-p', '--prompt', default='a photo of an astronaut riding a horse on mars', help='the prompt to use')
+    t2i_parser.add_argument('-x', '--seed', default='420', help='seed for pinning random generations', type=int)
+    t2i_parser.add_argument('-s', '--steps', default='20', help='number of generation steps', type=int)
+    t2i_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
+    t2i_parser.add_argument('-y', '--scheduler', default='ddim', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera')
+    t2i_parser.add_argument('-r', '--resolution', default='512x512', help='the resolution of the image delimited by an \'x\' (e.g. 512x512)', type=resolution_validation)
+    t2i_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
+    t2i_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
+    t2i_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
+    t2i_parser.add_argument('-o', '--output-path', default='output_sd_15.png', help='path for image output when generation is complete')
+    t2i_parser.set_defaults(func=t2i)
 
     # server parser
     server_parser = subparsers.add_parser('server', help='the server subcommand')
