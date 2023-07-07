@@ -61,6 +61,17 @@ def start_server(args):
         except KeyboardInterrupt:
             print("\nServer stopped by user.")
 
+def status_server(args):
+    try:
+        response = requests.get('http://localhost:8000/health-check/')
+        if response.ok:
+            print('Server is up and running.')
+        else:
+            print('Server has not started.')
+    except requests.exceptions.ConnectionError:
+        print('Server has not started.')
+
+
 def stop_server(args):
     try:
         with open('aictl-server.pid', 'r') as pid_file:
@@ -101,6 +112,9 @@ def main():
     start_parser = server_subparsers.add_parser('start', help='start the server')
     start_parser.add_argument('-d', '--daemon', action='store_true', help='starts the server as a background process')
     start_parser.set_defaults(func=start_server)
+
+    status_parser = server_subparsers.add_parser('status', help='get the status of the server')
+    status_parser.set_defaults(func=status_server)
 
     stop_parser = server_subparsers.add_parser('stop', help='stop the server')
     stop_parser.set_defaults(func=stop_server)
