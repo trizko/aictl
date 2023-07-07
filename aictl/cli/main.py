@@ -35,7 +35,9 @@ def t2i(args):
     model_type = torch.float32 if is_mac else torch.float16
     pipe = StableDiffusionPipeline.from_pretrained(
         args.model, 
-        torch_dtype=model_type
+        torch_dtype=model_type,
+        safety_checker = None,
+        requires_safety_checker = False
     )
     pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
     if is_mac:
