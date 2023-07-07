@@ -73,6 +73,10 @@ async def load_model():
 def get_model():
     return model
 
+@app.get("/health-check/")
+async def health_check():
+    return { 'status': 'OK' }
+
 @app.post("/generate/")
 async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_model)):
     # Get preprocessor, pipeline and lock
