@@ -1,7 +1,10 @@
 import argparse
 import base64
 import json
+import os
 import requests
+import signal
+import subprocess
 from collections import namedtuple
 
 from aictl.common.types import T2IConfig
@@ -35,12 +38,41 @@ def resolution_validation(x):
     return Size(int(x[0]), int(x[1]))
 
 def start_server(args):
-    print(args)
-    pass
+    if args.daemon:
+        with open('aictl-server.log', 'a') as log_file:
+            server = subprocess.Popen(
+                'PYTORCH_ENABLE_MPS_FALLBACK=1 python -m uvicorn aictl.server.main:app',
+                stdout=log_file,
+                stderr=log_file,
+                preexec_fn=os.setsid,
+                shell=True
+            )
+            with open('aictl-server.pid', 'w') as pid_file:
+                pid_file.write(str(server.pid))
+    else:
+        try:
+            subprocess.run(
+                'PYTORCH_ENABLE_MPS_FALLBACK=1 python -m uvicorn aictl.server.main:app',
+                check=True,
+                shell=True
+            )
+        except subprocess.CalledProcessError:
+            print("Server failed to start.")
+        except KeyboardInterrupt:
+            print("\nServer stopped by user.")
 
 def stop_server(args):
-    print(args)
-    pass
+    try:
+        with open('aictl-server.pid', 'r') as pid_file:
+            pid = int(pid_file.read())
+            os.killpg(pid, signal.SIGTERM)
+            print(f'Stopped server with PID {pid}')
+    except FileNotFoundError:
+        print('PID file not found. Is the server running?')
+    except ValueError:
+        print('PID file is empty. Is the server running?')
+    except ProcessLookupError:
+        print(f'No process with PID {pid}.')
 
 def main():
     parser = argparse.ArgumentParser(description="A command-line interface for ai models")
@@ -67,6 +99,7 @@ def main():
     server_subparsers = server_parser.add_subparsers()
 
     start_parser = server_subparsers.add_parser('start', help='start the server')
+    start_parser.add_argument('-d', '--daemon', action='store_true', help='starts the server as a background process')
     start_parser.set_defaults(func=start_server)
 
     stop_parser = server_subparsers.add_parser('stop', help='stop the server')

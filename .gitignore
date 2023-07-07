@@ -162,3 +162,4 @@ cython_debug/
 # Random other stuff
 *.png
 *.jpg
+*.pid
