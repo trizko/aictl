@@ -26,3 +26,13 @@ PYTORCH_ENABLE_MPS_FALLBACK=1 aictl --help
 # on Linux
 aictl --help
 ```
+
+## Development
+If you would like to contribute to the project, you could use the above methods for installation and usage to test your changes. However, it's much faster to skip `pip install` every time you make changes. You should only need to run `pip install` when you change anything in the dependencies. To test your changes, run the code with the following commands:
+```bash
+# on Mac
+PYTORCH_ENABLE_MPS_FALLBACK=1 python aictl/cli/main.py <args>
+
+# on Linux
+python aictl/cli/main.py <args>
+```
