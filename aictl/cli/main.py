@@ -125,8 +125,9 @@ def t2v(args):
         device = torch.device("mps")
         print("MPS device detected. Using MPS.")
 
-    pipe = DiffusionPipeline.from_pretrained("damo-vilab/text-to-video-ms-1.7b", torch_dtype=torch.float16, variant="fp16")
-
+    model_type = torch.float32 if is_mac else torch.float16
+    variant = 'fp32' if is_mac else 'fp16'
+    pipe = DiffusionPipeline.from_pretrained("damo-vilab/text-to-video-ms-1.7b", torch_dtype=model_type, variant=variant)
 
     # memory optimization
     if is_mac:
