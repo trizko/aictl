@@ -139,7 +139,7 @@ def t2v(args):
      
     print(args.prompt)
     video_frames = pipe(args.prompt, num_frames=args.frames).frames
-    video_path = export_to_video(video_frames)
+    video_path = export_to_video(video_frames, output_video_path=args.output_path)
     print(video_path)
 
 def resolution_validator(x):
@@ -209,6 +209,7 @@ def main():
     t2v_parser.add_argument('-m', '--model', default='damo-vilab/text-to-video-ms-1.7b', help='the model id to use')
     t2v_parser.add_argument('-p', '--prompt', default='Darth Vader surfing a wave', help='the prompt to use')
     t2v_parser.add_argument('-f', '--frames', default='16', help='number of frames generated', type=int)
+    t2v_parser.add_argument('-o', '--output-path', default='output_t2v.mp4', help='the path for video when generation is complete')
     t2v_parser.set_defaults(func=t2v)
 
 
