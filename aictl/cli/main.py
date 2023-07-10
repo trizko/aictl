@@ -112,6 +112,36 @@ def ip2p(args):
     print("### saving image files")
     output.images[0].save(args.output_path)
 
+def t2v(args):
+    import torch
+    from diffusers import DiffusionPipeline
+    from diffusers.utils import export_to_video
+
+     # check if on mac and mps is available, fallback to cuda then cpu
+    is_mac = False
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    if torch.backends.mps.is_available():
+        is_mac = True
+        device = torch.device("mps")
+        print("MPS device detected. Using MPS.")
+
+    pipe = DiffusionPipeline.from_pretrained("damo-vilab/text-to-video-ms-1.7b", torch_dtype=torch.float16, variant="fp16")
+
+
+    # memory optimization
+    if is_mac:
+        pipe.enable_attention_slicing()
+    else:
+        pipe.enable_vae_slicing()
+        pipe.enable_model_cpu_offload()
+        pipe.enable_xformers_memory_efficient_attention()
+    pipe = pipe.to(device)
+     
+    print(args.prompt)
+    video_frames = pipe(args.prompt, num_frames=args.frames).frames
+    video_path = export_to_video(video_frames)
+    print(video_path)
+
 def resolution_validator(x):
     x = x.split('x')
     return Size(int(x[0]), int(x[1]))
@@ -174,6 +204,13 @@ def main():
     ip2p_parser.add_argument('-c', '--cfg', default='1.0', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
     ip2p_parser.add_argument('-o', '--output-path', default='output_ip2p.png', help='path for image output when generation is complete')
     ip2p_parser.set_defaults(func=ip2p)
+
+    t2v_parser = subparsers.add_parser('t2v', help='the text-to-video subcommand')
+    t2v_parser.add_argument('-m', '--model', default='damo-vilab/text-to-video-ms-1.7b', help='the model id to use')
+    t2v_parser.add_argument('-p', '--prompt', default='Darth Vader surfing a wave', help='the prompt to use')
+    t2v_parser.add_argument('-f', '--frames', default='16', help='number of frames generated', type=int)
+    t2v_parser.set_defaults(func=t2v)
+
 
     args = parser.parse_args()
 
