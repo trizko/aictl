@@ -2,7 +2,7 @@
     // You can add your JavaScript code here
 </script>
 
-<style>
+<style type="text/postcss">
     :global(body) {
         margin: 0;
         padding: 0;
@@ -15,5 +15,5 @@
 </style>
 
 <main>
-    <div class="grid-item"></div>
+    <!-- HTML -->
 </main>
