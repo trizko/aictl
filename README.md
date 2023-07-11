@@ -36,3 +36,14 @@ PYTORCH_ENABLE_MPS_FALLBACK=1 python aictl/cli/main.py <args>
 # on Linux
 python aictl/cli/main.py <args>
 ```
+
+## Roadmap
+The following items are either in progress or will be in future iterations:
+- [ ] Ability to upscale images/video
+- [ ] Text-to-audio model support
+- [ ] Frontend webapp
+- [ ] Server to support the frontend
+- [ ] Support for fine-tuning and training models
+- [ ] Ability to add ControlNet into pipelines
+- [ ] Segmentation model support
+- [ ] SDXL support (when model weights are available)
