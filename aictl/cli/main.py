@@ -1,7 +1,10 @@
 import argparse
 import PIL
 import requests
+import calendar
 from collections import namedtuple
+from datetime import datetime
+
 
 # define named tuple for the size of result image
 Size = namedtuple('Size', 'width height')
@@ -184,6 +187,10 @@ def main():
     parser = argparse.ArgumentParser(description="A command-line interface for ai models")
 
     subparsers = parser.add_subparsers()
+    
+    #Set the timestamp
+    today_time = datetime.now()
+    utc_time = calendar.timegm(today_time.utctimetuple())
 
     t2i_parser = subparsers.add_parser('t2i', help='the text-to-image subcommand')
     t2i_parser.add_argument('-m', '--model', default='runwayml/stable-diffusion-v1-5', help='the model id to use')
@@ -196,7 +203,7 @@ def main():
     t2i_parser.add_argument('-c', '--cfg', default='7.5', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
     t2i_parser.add_argument('-d', '--denoiser', default='0.7', help='modulate the influence of guidance images on the denoising process (default=0.7)', type=float)
     t2i_parser.add_argument('-b', '--batch-size', default='1', help='number of images per generation', type=int)
-    t2i_parser.add_argument('-o', '--output-path', default='output_t2i.png', help='path for image output when generation is complete')
+    t2i_parser.add_argument('-o', '--output-path', default=f'output_t2i{utc_time}.png', help='path for image output when generation is complete')
     t2i_parser.set_defaults(func=t2i)
 
     ip2p_parser = subparsers.add_parser('ip2p', help='the instruct-pix2pix subcommand')
@@ -209,14 +216,14 @@ def main():
     ip2p_parser.add_argument('-n', '--negative-prompt', default='', help='prompt keywords to be excluded')
     ip2p_parser.add_argument('-y', '--scheduler', default='eulera', help='available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera', type=scheduler_validator)
     ip2p_parser.add_argument('-c', '--cfg', default='1.0', help='higher values tell the image gen to follow the prompt more closely (default=7.5)', type=float)
-    ip2p_parser.add_argument('-o', '--output-path', default='output_ip2p.png', help='path for image output when generation is complete')
+    ip2p_parser.add_argument('-o', '--output-path', default=f'output_ip2p{utc_time}.png', help='path for image output when generation is complete')
     ip2p_parser.set_defaults(func=ip2p)
 
     t2v_parser = subparsers.add_parser('t2v', help='the text-to-video subcommand')
     t2v_parser.add_argument('-m', '--model', default='damo-vilab/text-to-video-ms-1.7b', help='the model id to use')
     t2v_parser.add_argument('-p', '--prompt', default='Darth Vader surfing a wave', help='the prompt to use')
     t2v_parser.add_argument('-f', '--frames', default='16', help='number of frames generated', type=int)
-    t2v_parser.add_argument('-o', '--output-path', default='output_t2v.mp4', help='the path for video when generation is complete')
+    t2v_parser.add_argument('-o', '--output-path', default=f'output_t2v{utc_time}.mp4', help='the path for video when generation is complete')
     t2v_parser.set_defaults(func=t2v)
 
 
