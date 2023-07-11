@@ -121,6 +121,12 @@ def t2v(args):
     is_mac = False
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     if torch.backends.mps.is_available():
+
+        # TODO: remove this block of when https://github.com/pytorch/pytorch/pull/99246 is merged
+        print("ERROR: MPS currently does not support text-to-video pipelines. This will only work when the following PR is merged and released: https://github.com/pytorch/pytorch/pull/99246")
+        return
+        # TODO END
+
         is_mac = True
         device = torch.device("mps")
         print("MPS device detected. Using MPS.")
