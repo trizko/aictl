@@ -1,13 +1,9 @@
 import asyncio
 import base64
 import io
-import json
-import re
-import time
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
 
 import torch
 from diffusers import StableDiffusionPipeline, UniPCMultistepScheduler
