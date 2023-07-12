@@ -1,4 +1,5 @@
 # aictl
+![ci-python](https://github.com/trizko/aictl/actions/workflows/ci.yml/badge.svg)
 
 `aictl` is a commandline tool for running ai models on mac and linux.
 
