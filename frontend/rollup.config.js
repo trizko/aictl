@@ -16,24 +16,24 @@ function serve() {
 		if (server) server.kill(0);
 	}
 
-    return {
-        writeBundle() {
-          if (server) return;
-          // Spawn a child server process
-          server = spawn(
-            'npm',
-            ['run', 'start', '--', '--dev'],
-            {
-              stdio: ['ignore', 'inherit', 'inherit'],
-              shell: true,
-            }
-          );
-    
-          // Kill server on process termination or exit
-          process.on('SIGTERM', toExit);
-          process.on('exit', toExit);
-        },
-      };
+	return {
+		writeBundle() {
+			if (server) return;
+			// Spawn a child server process
+			server = spawn(
+				'npm',
+				['run', 'start', '--', '--dev'],
+				{
+					stdio: ['ignore', 'inherit', 'inherit'],
+					shell: true,
+				}
+			);
+
+			// Kill server on process termination or exit
+			process.on('SIGTERM', toExit);
+			process.on('exit', toExit);
+		},
+	};
 }
 
 export default {
@@ -59,7 +59,7 @@ export default {
 		commonjs(),
 		!production && serve(),
 		!production && livereload('public'),
-        production && terser(),
+		production && terser(),
 	],
 	watch: {
 		clearScreen: false
