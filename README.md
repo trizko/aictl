@@ -13,8 +13,8 @@ pip install --upgrade pip
 # on Mac
 pip install --pre --extra-index-url https://download.pytorch.org/whl/nightly/cpu .
 
-# on Linux
-pip install --extra-index-url https://download.pytorch.org/whl/cu116 .
+# on Linux (if you have an nvidia gpu)
+pip install --extra-index-url https://download.pytorch.org/whl/cu116 .[xformers]
 ```
 
 ## Usage
@@ -28,7 +28,15 @@ aictl --help
 ```
 
 ## Development
-If you would like to contribute to the project, you could use the above methods for installation and usage to test your changes. However, it's much faster to skip `pip install` every time you make changes. You should only need to run `pip install` when you change anything in the dependencies. To test your changes, run the code with the following commands:
+To install `aictl` for development, you will want to add the `dev` flag in the install command. This flag will download development dependencies such as the linter and formatter. To install with this flag, run one of the following commands:
+```bash
+# on Mac
+pip install --pre --extra-index-url https://download.pytorch.org/whl/nightly/cpu .[dev]
+
+# on Linux (if you have an nvidia gpu)
+pip install --extra-index-url https://download.pytorch.org/whl/cu116 .[dev,xformers]
+```
+To test your changes, run the code with the following commands:
 ```bash
 # on Mac
 PYTORCH_ENABLE_MPS_FALLBACK=1 python aictl/cli/main.py <args>
@@ -36,6 +44,12 @@ PYTORCH_ENABLE_MPS_FALLBACK=1 python aictl/cli/main.py <args>
 # on Linux
 python aictl/cli/main.py <args>
 ```
+Before commiting changes to the repo, please run the linter and formatter:
+```bash
+black aictl
+ruff aictl
+```
+Check the output of these commands and make sure these commands do not output any warnings or errors.
 
 ## Roadmap
 The following items are either in progress or will be in future iterations:

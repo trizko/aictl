@@ -22,6 +22,11 @@ setup(
         'uvicorn',
     ],
     extras_require={
+        'dev':  [
+            'black',
+            'pytest',
+            'ruff',
+        ],
         'xformers':  [
             'xformers',
         ],
