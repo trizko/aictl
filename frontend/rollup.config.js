@@ -49,6 +49,12 @@ export default {
 			preprocess: sveltePreprocess({ sourceMap: !production, postcss: true }),
 			compilerOptions: {
 				dev: !production
+			},
+			onwarn: (warning, handler) => {
+				const { code, frame } = warning;
+				if (code === "css-unused-selector")
+					return;
+				handler(warning);
 			}
 		}),
 		css({ output: 'bundle.css' }),
