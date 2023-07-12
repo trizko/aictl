@@ -1,8 +1,12 @@
 <script>
-    // You can add your JavaScript code here
+    import Logo from './components/Logo.svelte';
 </script>
 
 <style type="text/postcss">
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
     :global(body) {
         margin: 0;
         padding: 0;
@@ -14,6 +18,6 @@
     }
 </style>
 
-<main>
-    <!-- HTML -->
-</main>
+<div>
+    <Logo />
+</div>
