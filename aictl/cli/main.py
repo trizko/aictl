@@ -161,6 +161,24 @@ def t2v(args):
     print(video_path)
 
 
+# Text to Audio
+def t2a(args):
+    from audiocraft.models import MusicGen
+    from audiocraft.data.audio import audio_write
+
+    # TODO add this to args
+    model = MusicGen.get_pretrained("melody")
+
+    # Set the duration
+    model.set_generation_params(duration=int(args.duration))
+
+    # Set the description, for now one at a time
+    wav = model.generate([args.prompt])
+
+    # TODO set strategy to arguments
+    audio_write(args.output_path, wav[0].cpu(), model.sample_rate, strategy="loudness")
+
+
 def resolution_validator(x):
     x = x.split("x")
     return Size(int(x[0]), int(x[1]))
@@ -352,6 +370,21 @@ def main():
         help="the path for video when generation is complete",
     )
     t2v_parser.set_defaults(func=t2v)
+
+    t2a_parser = subparsers.add_parser("t2a", help="the text-to-audio subcommand")
+    t2a_parser.add_argument(
+        "-p", "--prompt", default="Greek folk", help="the prompt to use"
+    )
+    t2a_parser.add_argument(
+        "-o",
+        "--output-path",
+        default=f"output_t2a{utc_time}",
+        help="the path for audio when generation is complete",
+    )
+    t2a_parser.add_argument(
+        "-d", "--duration", default="8", help="how long the audio lasts in seconds"
+    )
+    t2a_parser.set_defaults(func=t2a)
 
     args = parser.parse_args()
 
