@@ -1,5 +1,6 @@
 <script>
     import Logo from './components/Logo.svelte';
+    import Toolbar from './components/Toolbar.svelte';
 </script>
 
 <style type="text/postcss">
@@ -16,8 +17,16 @@
             linear-gradient(to right, rgb(255, 255, 255, 0.2) 1px, transparent 1px),
             linear-gradient(to bottom, rgb(255, 255, 255, 0.2) 1px, transparent 1px);
     }
+
+    .main {
+        height: 200rem;
+        width: 200rem;
+    }
 </style>
 
-<div>
+<div class="main">
     <Logo />
+    <div class="flex h-screen flex-col justify-center">
+        <Toolbar />
+    </div>
 </div>
