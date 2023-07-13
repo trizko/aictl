@@ -68,7 +68,8 @@ def t2i(args):
     )
 
     print("### saving image files")
-    output.images[0].save(args.output_path)
+    for i, image in enumerate(output.images):
+        image.save(f"{args.output_path.split('.png')[0]}_{i}.png")
 
 
 def ip2p(args):
@@ -117,7 +118,8 @@ def ip2p(args):
     )
 
     print("### saving image files")
-    output.images[0].save(args.output_path)
+    for i, image in enumerate(output.images):
+        image.save(f"{args.output_path.split('.png')[0]}_{i}.png")
 
 
 def t2v(args):
