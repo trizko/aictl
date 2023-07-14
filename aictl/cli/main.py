@@ -167,11 +167,8 @@ def t2a(args):
     from audiocraft.models import MusicGen
     from audiocraft.data.audio import audio_write
 
-
     if torch.backends.mps.is_available():
-        print(
-            "ERROR: MPS currently does not support text-to-audio pipelines."
-        )
+        print("ERROR: MPS currently does not support text-to-audio pipelines.")
         return
 
     model = MusicGen.get_pretrained(args.model)
@@ -182,7 +179,13 @@ def t2a(args):
     # Set the description, for now one at a time
     wav = model.generate([args.prompt])
     # Write to file
-    audio_write(args.output_path, wav[0].cpu(), model.sample_rate, strategy="loudness",loudness_compressor = True)
+    audio_write(
+        args.output_path,
+        wav[0].cpu(),
+        model.sample_rate,
+        strategy="loudness",
+        loudness_compressor=True,
+    )
 
 
 def resolution_validator(x):
@@ -382,9 +385,12 @@ def main():
         "-p", "--prompt", default="Greek folk", help="the prompt to use"
     )
     t2a_parser.add_argument(
-        "-m", "--model", default="small", help="the MusicGen model to use (options: small, medium, large, melody)"
+        "-m",
+        "--model",
+        default="small",
+        help="the MusicGen model to use (options: small, medium, large, melody)",
     )
-    
+
     t2a_parser.add_argument(
         "-o",
         "--output-path",
