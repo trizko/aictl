@@ -22,7 +22,10 @@ setup(
         'uvicorn',
     ],
     extras_require={
-        'dev':  [
+       'audio': [
+            'audiocraft @ git+https://github.com/facebookresearch/audiocraft.git'
+        ],
+       'dev':  [
             'black',
             'pytest',
             'ruff',
