@@ -163,10 +163,17 @@ def t2v(args):
 
 # Text to Audio
 def t2a(args):
+    import torch
     from audiocraft.models import MusicGen
     from audiocraft.data.audio import audio_write
 
-    # TODO add this to args
+
+    if torch.backends.mps.is_available():
+        print(
+            "ERROR: MPS currently does not support text-to-audio pipelines."
+        )
+        return
+
     model = MusicGen.get_pretrained(args.model)
 
     # Set the duration
@@ -174,8 +181,7 @@ def t2a(args):
 
     # Set the description, for now one at a time
     wav = model.generate([args.prompt])
-
-    # TODO set strategy to arguments
+    # Write to file
     audio_write(args.output_path, wav[0].cpu(), model.sample_rate, strategy="loudness",loudness_compressor = True)
 
 
