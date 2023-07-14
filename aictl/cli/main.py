@@ -167,7 +167,7 @@ def t2a(args):
     from audiocraft.data.audio import audio_write
 
     # TODO add this to args
-    model = MusicGen.get_pretrained("melody")
+    model = MusicGen.get_pretrained(args.model)
 
     # Set the duration
     model.set_generation_params(duration=int(args.duration))
@@ -176,7 +176,7 @@ def t2a(args):
     wav = model.generate([args.prompt])
 
     # TODO set strategy to arguments
-    audio_write(args.output_path, wav[0].cpu(), model.sample_rate, strategy="loudness")
+    audio_write(args.output_path, wav[0].cpu(), model.sample_rate, strategy="loudness",loudness_compressor = True)
 
 
 def resolution_validator(x):
@@ -375,6 +375,10 @@ def main():
     t2a_parser.add_argument(
         "-p", "--prompt", default="Greek folk", help="the prompt to use"
     )
+    t2a_parser.add_argument(
+        "-m", "--model", default="small", help="the MusicGen model to use (options: small, medium, large, melody)"
+    )
+    
     t2a_parser.add_argument(
         "-o",
         "--output-path",
