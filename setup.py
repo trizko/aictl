@@ -20,9 +20,7 @@ setup(
         'torchaudio',
         'transformers',
         'uvicorn',
-        'upscaler': [
-            'RealESRGAN @ git+https://github.com/ai-forever/Real-ESRGAN.git',
-        ],
+        'RealESRGAN @ git+https://github.com/ai-forever/Real-ESRGAN.git',
     ],
     extras_require={
        'audio': [
