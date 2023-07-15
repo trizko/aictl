@@ -226,11 +226,9 @@ def upscale(args):
         upscaled_image = pipe(prompt=args.prompt, image=image).images[0]
         upscaled_image.save(args.output_path)
 
-    if args.model == "esrgan":
+    elif args.model == "esrgan":
         model = RealESRGAN(device, scale=args.scale)
-        model.load_weights(
-            "weights/RealESRGAN_x" + str(args.scale) + ".pth", download=True
-        )
+        model.load_weights(f"weights/RealESRGAN_x{args.scale}.pth", download=True)
         upscaled_image = model.predict(image)
         upscaled_image.save(args.output_path)
 
@@ -451,7 +449,9 @@ def main():
 
     ####Upscale
     upscale_parser = subparsers.add_parser("upscale", help="Upscale an image")
-    upscale_parser.add_argument("-p", "--prompt", default="", help="the prompt to use")
+    upscale_parser.add_argument(
+        "-p", "--prompt", default="", help="the prompt to use, only works with sdx4"
+    )
     upscale_parser.add_argument(
         "-i", "--image", default=None, help="the local image file to edit"
     )
@@ -478,7 +478,7 @@ def main():
         "-m",
         "--model",
         default="esrgan",
-        help="the upscale model (x4) to use (options: esrgan,sdx4:use this on your own risk.OOM danger!!)",
+        help="the upscale model (x4) to use (options: esrgan,sdx4)",
     )
     upscale_parser.add_argument(
         "-s",

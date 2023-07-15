@@ -18,7 +18,6 @@ lib/
 lib64/
 parts/
 sdist/
-weights/
 var/
 wheels/
 share/python-wheels/
@@ -165,3 +164,4 @@ cython_debug/
 *.jpg
 *.pid
 *.mp4
+weights/
