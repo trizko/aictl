@@ -188,15 +188,13 @@ def t2a(args):
         loudness_compressor=True,
     )
 
+
 def upscale(args):
     import torch
-    from PIL import Image
-    import numpy as np
     from RealESRGAN import RealESRGAN
     from diffusers import StableDiffusionUpscalePipeline
 
-
-        # check if on mac and mps is available, fallback to cuda then cpu
+    # check if on mac and mps is available, fallback to cuda then cpu
     is_mac = False
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     if torch.backends.mps.is_available():
@@ -204,19 +202,20 @@ def upscale(args):
         device = torch.device("mps")
         print("MPS device detected. Using MPS.")
 
-
-    #Get the image
+    # Get the image
     if args.image is None:
         image = download_image(args.image_url)
     else:
         image = load_image_from_path(args.image)
-    #SDX4 Upscaler 
-    if args.model=='sdx4' :
+    # SDX4 Upscaler
+    if args.model == "sdx4":
         # load models and configure pipeline settings
         print("### loading models")
         model_type = torch.float32 if is_mac else torch.float16
         model_id = "stabilityai/stable-diffusion-x4-upscaler"
-        pipe = StableDiffusionUpscalePipeline.from_pretrained(model_id, torch_dtype=model_type)
+        pipe = StableDiffusionUpscalePipeline.from_pretrained(
+            model_id, torch_dtype=model_type
+        )
         pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
         if is_mac:
             pipe.enable_attention_slicing()
@@ -227,9 +226,11 @@ def upscale(args):
         upscaled_image = pipe(prompt=args.prompt, image=image).images[0]
         upscaled_image.save(args.output_path)
 
-    if args.model=='esrgan':
+    if args.model == "esrgan":
         model = RealESRGAN(device, scale=args.scale)
-        model.load_weights('weights/RealESRGAN_x'+str(args.scale)+'.pth', download=True)
+        model.load_weights(
+            "weights/RealESRGAN_x" + str(args.scale) + ".pth", download=True
+        )
         upscaled_image = model.predict(image)
         upscaled_image.save(args.output_path)
 
@@ -447,13 +448,10 @@ def main():
         "-d", "--duration", default="8", help="how long the audio lasts in seconds"
     )
     t2a_parser.set_defaults(func=t2a)
-    
-    
-    ####Upscale 
+
+    ####Upscale
     upscale_parser = subparsers.add_parser("upscale", help="Upscale an image")
-    upscale_parser.add_argument(
-        "-p", "--prompt", default="", help="the prompt to use"
-    )
+    upscale_parser.add_argument("-p", "--prompt", default="", help="the prompt to use")
     upscale_parser.add_argument(
         "-i", "--image", default=None, help="the local image file to edit"
     )
