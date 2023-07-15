@@ -20,6 +20,7 @@ setup(
         'torchaudio',
         'transformers',
         'uvicorn',
+        'RealESRGAN @ git+https://github.com/ai-forever/Real-ESRGAN.git',
     ],
     extras_require={
        'audio': [
