@@ -232,7 +232,8 @@ def upscale(args):
         upscaled_image = model.predict(image)
         upscaled_image.save(args.output_path)
 
-#Text to Text
+
+# Text to Text
 def t2t(args):
     import torch
     from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -243,21 +244,23 @@ def t2t(args):
         is_mac = True
         device = torch.device("mps")
         print("MPS device detected. Using MPS.")
-    
+
     model_type = torch.float32 if is_mac else torch.float16
     model_id = args.model
-    
+
     tokenizer = T5Tokenizer.from_pretrained(model_id)
-    model = T5ForConditionalGeneration.from_pretrained(model_id, device_map="auto", torch_dtype=model_type)
-    
-    
+    model = T5ForConditionalGeneration.from_pretrained(
+        model_id, device_map="auto", torch_dtype=model_type
+    )
+
     input_text = args.prompt
     print(f"Input: {args.prompt}")
-    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
-    #TODO consider adding a parameter for max_new_tokens -- Danger OOM
-    outputs = model.generate(input_ids,max_new_tokens=256)
+    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
+    # TODO consider adding a parameter for max_new_tokens -- Danger OOM
+    outputs = model.generate(input_ids, max_new_tokens=256)
     output_text = tokenizer.decode(outputs.squeeze(), skip_special_tokens=True)
     print(f"Output: {output_text}")
+
 
 def resolution_validator(x):
     x = x.split("x")
