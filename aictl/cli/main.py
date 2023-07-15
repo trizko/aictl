@@ -232,6 +232,32 @@ def upscale(args):
         upscaled_image = model.predict(image)
         upscaled_image.save(args.output_path)
 
+#Text to Text
+def t2t(args):
+    import torch
+    from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+    is_mac = False
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    if torch.backends.mps.is_available():
+        is_mac = True
+        device = torch.device("mps")
+        print("MPS device detected. Using MPS.")
+    
+    model_type = torch.float32 if is_mac else torch.float16
+    model_id = args.model
+    
+    tokenizer = T5Tokenizer.from_pretrained(model_id)
+    model = T5ForConditionalGeneration.from_pretrained(model_id, device_map="auto", torch_dtype=model_type)
+    
+    
+    input_text = args.prompt
+    print(f"Input: {args.prompt}")
+    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
+    #TODO consider adding a parameter for max_new_tokens -- Danger OOM
+    outputs = model.generate(input_ids,max_new_tokens=256)
+    output_text = tokenizer.decode(outputs.squeeze(), skip_special_tokens=True)
+    print(f"Output: {output_text}")
 
 def resolution_validator(x):
     x = x.split("x")
@@ -329,6 +355,11 @@ def main():
     upscale_parser.add_argument( "-m", "--model", default="esrgan", help="the upscale model (x4) to use (options: esrgan,sdx4)")
     upscale_parser.add_argument( "-s", "--scale", default="4", help="the scale factor for the upscale", type=int)
     upscale_parser.set_defaults(func=upscale)
+    
+    t2t_parser = subparsers.add_parser("t2t", help="Text to Text")
+    t2t_parser.add_argument( "-p", "--prompt", default="What color is the sky?", help="the prompt to use, ask a question")
+    t2t_parser.add_argument( "-m", "--model", default="google/flan-t5-base", help="The model to use")
+    t2t_parser.set_defaults(func=t2t)
     # fmt: on
 
     args = parser.parse_args()
