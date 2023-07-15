@@ -207,6 +207,7 @@ def upscale(args):
         image = download_image(args.image_url)
     else:
         image = load_image_from_path(args.image)
+
     # SDX4 Upscaler
     if args.model == "sdx4":
         # load models and configure pipeline settings
@@ -225,7 +226,6 @@ def upscale(args):
         pipe = pipe.to(device)
         upscaled_image = pipe(prompt=args.prompt, image=image).images[0]
         upscaled_image.save(args.output_path)
-
     elif args.model == "esrgan":
         model = RealESRGAN(device, scale=args.scale)
         model.load_weights(f"weights/RealESRGAN_x{args.scale}.pth", download=True)
@@ -278,216 +278,58 @@ def main():
     today_time = datetime.now()
     utc_time = calendar.timegm(today_time.utctimetuple())
 
+    # fmt: off
     t2i_parser = subparsers.add_parser("t2i", help="the text-to-image subcommand")
-    t2i_parser.add_argument(
-        "-m",
-        "--model",
-        default="runwayml/stable-diffusion-v1-5",
-        help="the model id to use",
-    )
-    t2i_parser.add_argument(
-        "-p",
-        "--prompt",
-        default="a photo of an astronaut riding a horse on mars",
-        help="the prompt to use",
-    )
-    t2i_parser.add_argument(
-        "-x",
-        "--seed",
-        default="420",
-        help="seed for pinning random generations",
-        type=int,
-    )
-    t2i_parser.add_argument(
-        "-s", "--steps", default="20", help="number of generation steps", type=int
-    )
-    t2i_parser.add_argument(
-        "-n", "--negative-prompt", default="", help="prompt keywords to be excluded"
-    )
-    t2i_parser.add_argument(
-        "-y",
-        "--scheduler",
-        default="ddim",
-        help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera",
-        type=scheduler_validator,
-    )
-    t2i_parser.add_argument(
-        "-r",
-        "--resolution",
-        default="512x512",
-        help="the resolution of the image delimited by an 'x' (e.g. 512x512)",
-        type=resolution_validator,
-    )
-    t2i_parser.add_argument(
-        "-c",
-        "--cfg",
-        default="7.5",
-        help="higher values tell the image gen to follow the prompt more closely (default=7.5)",
-        type=float,
-    )
-    t2i_parser.add_argument(
-        "-d",
-        "--denoiser",
-        default="0.7",
-        help="modulate the influence of guidance images on the denoising process (default=0.7)",
-        type=float,
-    )
-    t2i_parser.add_argument(
-        "-b",
-        "--batch-size",
-        default="1",
-        help="number of images per generation",
-        type=int,
-    )
-    t2i_parser.add_argument(
-        "-o",
-        "--output-path",
-        default=f"output_t2i{utc_time}.png",
-        help="path for image output when generation is complete",
-    )
+    t2i_parser.add_argument( "-m", "--model", default="runwayml/stable-diffusion-v1-5", help="the model id to use")
+    t2i_parser.add_argument( "-p", "--prompt", default="a photo of an astronaut riding a horse on mars", help="the prompt to use")
+    t2i_parser.add_argument( "-x", "--seed", default="420", help="seed for pinning random generations", type=int)
+    t2i_parser.add_argument( "-s", "--steps", default="20", help="number of generation steps", type=int)
+    t2i_parser.add_argument( "-n", "--negative-prompt", default="", help="prompt keywords to be excluded")
+    t2i_parser.add_argument( "-y", "--scheduler", default="ddim", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
+    t2i_parser.add_argument( "-r", "--resolution", default="512x512", help="the resolution of the image delimited by an 'x' (e.g. 512x512)", type=resolution_validator)
+    t2i_parser.add_argument( "-c", "--cfg", default="7.5", help="higher values tell the image gen to follow the prompt more closely (default=7.5)", type=float)
+    t2i_parser.add_argument( "-d", "--denoiser", default="0.7", help="modulate the influence of guidance images on the denoising process (default=0.7)", type=float)
+    t2i_parser.add_argument( "-b", "--batch-size", default="1", help="number of images per generation", type=int)
+    t2i_parser.add_argument( "-o", "--output-path", default=f"output_t2i{utc_time}.png", help="path for image output when generation is complete")
     t2i_parser.set_defaults(func=t2i)
 
     ip2p_parser = subparsers.add_parser("ip2p", help="the instruct-pix2pix subcommand")
-    ip2p_parser.add_argument(
-        "-m",
-        "--model",
-        default="timbrooks/instruct-pix2pix",
-        help="the model id to use",
-    )
-    ip2p_parser.add_argument(
-        "-p",
-        "--prompt",
-        default="turn him into cyborg",
-        help="the instruction prompt to use",
-    )
-    ip2p_parser.add_argument(
-        "-i", "--image", default=None, help="the local image file to edit"
-    )
-    ip2p_parser.add_argument(
-        "-u",
-        "--image-url",
-        default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg",
-        help="the url of the image to edit",
-    )
-    ip2p_parser.add_argument(
-        "-x",
-        "--seed",
-        default="420",
-        help="seed for pinning random generations",
-        type=int,
-    )
-    ip2p_parser.add_argument(
-        "-s", "--steps", default="10", help="number of generation steps", type=int
-    )
-    ip2p_parser.add_argument(
-        "-n", "--negative-prompt", default="", help="prompt keywords to be excluded"
-    )
-    ip2p_parser.add_argument(
-        "-y",
-        "--scheduler",
-        default="eulera",
-        help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera",
-        type=scheduler_validator,
-    )
-    ip2p_parser.add_argument(
-        "-c",
-        "--cfg",
-        default="1.0",
-        help="higher values tell the image gen to follow the prompt more closely (default=7.5)",
-        type=float,
-    )
-    ip2p_parser.add_argument(
-        "-o",
-        "--output-path",
-        default=f"output_ip2p{utc_time}.png",
-        help="path for image output when generation is complete",
-    )
+    ip2p_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
+    ip2p_parser.add_argument("-p","--prompt", default="turn him into cyborg", help="the instruction prompt to use")
+    ip2p_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
+    ip2p_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    ip2p_parser.add_argument("-x","--seed", default="420", help="seed for pinning random generations", type=int)
+    ip2p_parser.add_argument("-s", "--steps", default="10", help="number of generation steps", type=int)
+    ip2p_parser.add_argument("-n", "--negative-prompt", default="", help="prompt keywords to be excluded")
+    ip2p_parser.add_argument("-y","--scheduler", default="eulera", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
+    ip2p_parser.add_argument("-c","--cfg", default="1.0", help="higher values tell the image gen to follow the prompt more closely (default=7.5)", type=float)
+    ip2p_parser.add_argument("-o","--output-path", default=f"output_ip2p{utc_time}.png", help="path for image output when generation is complete")
     ip2p_parser.set_defaults(func=ip2p)
 
     t2v_parser = subparsers.add_parser("t2v", help="the text-to-video subcommand")
-    t2v_parser.add_argument(
-        "-m",
-        "--model",
-        default="damo-vilab/text-to-video-ms-1.7b",
-        help="the model id to use",
-    )
-    t2v_parser.add_argument(
-        "-p", "--prompt", default="Darth Vader surfing a wave", help="the prompt to use"
-    )
-    t2v_parser.add_argument(
-        "-f", "--frames", default="16", help="number of frames generated", type=int
-    )
-    t2v_parser.add_argument(
-        "-o",
-        "--output-path",
-        default=f"output_t2v{utc_time}.mp4",
-        help="the path for video when generation is complete",
-    )
+    t2v_parser.add_argument("-m","--model", default="damo-vilab/text-to-video-ms-1.7b", help="the model id to use")
+    t2v_parser.add_argument("-p", "--prompt", default="Darth Vader surfing a wave", help="the prompt to use")
+    t2v_parser.add_argument("-f", "--frames", default="16", help="number of frames generated", type=int)
+    t2v_parser.add_argument("-o","--output-path", default=f"output_t2v{utc_time}.mp4", help="the path for video when generation is complete")
     t2v_parser.set_defaults(func=t2v)
 
     t2a_parser = subparsers.add_parser("t2a", help="the text-to-audio subcommand")
-    t2a_parser.add_argument(
-        "-p", "--prompt", default="Greek folk", help="the prompt to use"
-    )
-    t2a_parser.add_argument(
-        "-m",
-        "--model",
-        default="small",
-        help="the MusicGen model to use (options: small, medium, large, melody)",
-    )
-
-    t2a_parser.add_argument(
-        "-o",
-        "--output-path",
-        default=f"output_t2a{utc_time}",
-        help="the path for audio when generation is complete",
-    )
-    t2a_parser.add_argument(
-        "-d", "--duration", default="8", help="how long the audio lasts in seconds"
-    )
+    t2a_parser.add_argument("-p", "--prompt", default="Greek folk", help="the prompt to use")
+    t2a_parser.add_argument("-m","--model", default="small", help="the MusicGen model to use (options: small, medium, large, melody)")
+    t2a_parser.add_argument("-o","--output-path",default=f"output_t2a{utc_time}", help="the path for audio when generation is complete")
+    t2a_parser.add_argument("-d", "--duration", default="8", help="how long the audio lasts in seconds")
     t2a_parser.set_defaults(func=t2a)
 
-    ####Upscale
     upscale_parser = subparsers.add_parser("upscale", help="Upscale an image")
-    upscale_parser.add_argument(
-        "-p", "--prompt", default="", help="the prompt to use, only works with sdx4"
-    )
-    upscale_parser.add_argument(
-        "-i", "--image", default=None, help="the local image file to edit"
-    )
-    upscale_parser.add_argument(
-        "-u",
-        "--image-url",
-        default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg",
-        help="the url of the image to edit",
-    )
-    upscale_parser.add_argument(
-        "-y",
-        "--scheduler",
-        default="euler",
-        help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera",
-        type=scheduler_validator,
-    )
-    upscale_parser.add_argument(
-        "-o",
-        "--output-path",
-        default=f"output_upscale{utc_time}.png",
-        help="the path for audio when generation is complete",
-    )
-    upscale_parser.add_argument(
-        "-m",
-        "--model",
-        default="esrgan",
-        help="the upscale model (x4) to use (options: esrgan,sdx4)",
-    )
-    upscale_parser.add_argument(
-        "-s",
-        "--scale",
-        default="4",
-        help="the scale factor for the upscale",
-        type=int,
-    )
+    upscale_parser.add_argument( "-p", "--prompt", default="", help="the prompt to use, only works with sdx4")
+    upscale_parser.add_argument( "-i", "--image", default=None, help="the local image file to edit")
+    upscale_parser.add_argument( "-u", "--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    upscale_parser.add_argument( "-y", "--scheduler", default="euler", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
+    upscale_parser.add_argument( "-o", "--output-path", default=f"output_upscale{utc_time}.png", help="the path for audio when generation is complete")
+    upscale_parser.add_argument( "-m", "--model", default="esrgan", help="the upscale model (x4) to use (options: esrgan,sdx4)")
+    upscale_parser.add_argument( "-s", "--scale", default="4", help="the scale factor for the upscale", type=int)
     upscale_parser.set_defaults(func=upscale)
+    # fmt: on
 
     args = parser.parse_args()
 
