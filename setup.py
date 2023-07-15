@@ -30,6 +30,9 @@ setup(
             'pytest',
             'ruff',
         ],
+        'upscaler': [
+            'RealESRGAN @ git+https://github.com/ai-forever/Real-ESRGAN.git',
+        ],
         'xformers':  [
             'xformers',
         ],
