@@ -248,7 +248,13 @@ def t2t(args):
     input_text = args.prompt
     print(f"Input: {args.prompt}")
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-    outputs = model.generate(input_ids, max_new_tokens=args.max_new_tokens, temperature=args.temp, top_k=args.top_k, top_p=args.top_p)
+    outputs = model.generate(
+        input_ids,
+        max_new_tokens=args.max_new_tokens,
+        temperature=args.temp,
+        top_k=args.top_k,
+        top_p=args.top_p,
+    )
     output_text = tokenizer.decode(outputs.squeeze(), skip_special_tokens=True)
     print(f"Output: {output_text}")
 

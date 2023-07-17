@@ -1,7 +1,6 @@
 import torch
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class DeviceType(str, Enum):
@@ -9,8 +8,9 @@ class DeviceType(str, Enum):
     CUDA = "cuda"
     MPS = "mps"
 
+
 @dataclass
-class SystemConfig():
+class SystemConfig:
     device: torch.device = torch.device("cpu")
     device_type: DeviceType = DeviceType.CPU
     model_type: torch.dtype = torch.float16
@@ -28,11 +28,10 @@ class SystemConfig():
             self.device = torch.device("cpu")
             self.device_type = DeviceType.CPU
             self.model_type = torch.float16
-    
+
     def set_pipeline_options(self, pipeline):
         if self.device_type == DeviceType.CUDA:
             pipeline.enable_model_cpu_offload()
             pipeline.enable_xformers_memory_efficient_attention()
         elif self.device_type == DeviceType.MPS:
             pipeline.enable_attention_slicing()
-
