@@ -256,8 +256,7 @@ def t2t(args):
     input_text = args.prompt
     print(f"Input: {args.prompt}")
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
-    # TODO consider adding a parameter for max_new_tokens -- Danger OOM
-    outputs = model.generate(input_ids, max_new_tokens=256)
+    outputs = model.generate(input_ids, max_new_tokens=args.max_new_tokens, temperature=args.temp, top_k=args.top_k, top_p=args.top_p)
     output_text = tokenizer.decode(outputs.squeeze(), skip_special_tokens=True)
     print(f"Output: {output_text}")
 
@@ -359,9 +358,14 @@ def main():
     upscale_parser.add_argument( "-s", "--scale", default="4", help="the scale factor for the upscale", type=int)
     upscale_parser.set_defaults(func=upscale)
     
+    # other options for text generation can be found here: https://huggingface.co/docs/transformers/v4.30.0/en/main_classes/text_generation#transformers.GenerationConfig
     t2t_parser = subparsers.add_parser("t2t", help="Text to Text")
     t2t_parser.add_argument( "-p", "--prompt", default="What color is the sky?", help="the prompt to use, ask a question")
     t2t_parser.add_argument( "-m", "--model", default="google/flan-t5-base", help="The model to use")
+    t2t_parser.add_argument( "-n", "--max-new-tokens", default="256", help="maximum numbers of tokens to generate (not including prompt)", type=int)
+    t2t_parser.add_argument( "-t", "--temp", default="1.0", help="value used to modulate the next token probabilities.", type=float)
+    t2t_parser.add_argument( "-k", "--top-k", default="50", help="number of highest probability vocabulary tokens to keep for top-k-filtering", type=int)
+    t2t_parser.add_argument( "-b", "--top-p", default="1.0", help="If set to float < 1, only the smallest set of most probable tokens with probabilities that add up to top_p or higher are kept for generation", type=float)
     t2t_parser.set_defaults(func=t2t)
     # fmt: on
 
