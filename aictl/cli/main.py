@@ -5,6 +5,8 @@ import calendar
 from collections import namedtuple
 from datetime import datetime
 
+from aictl.common.config import SystemConfig
+
 
 # define named tuple for the size of result image
 Size = namedtuple("Size", "width height")
@@ -28,30 +30,20 @@ def t2i(args):
     import torch
     from diffusers import StableDiffusionPipeline
 
-    # check if on mac and mps is available, fallback to cuda then cpu
-    is_mac = False
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    if torch.backends.mps.is_available():
-        is_mac = True
-        device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
+    # get config for device type
+    cfg = SystemConfig()
 
     # load models and configure pipeline settings
     print("### loading models")
-    model_type = torch.float32 if is_mac else torch.float16
     pipe = StableDiffusionPipeline.from_pretrained(
         args.model,
-        torch_dtype=model_type,
+        torch_dtype=cfg.model_type,
         safety_checker=None,
         requires_safety_checker=False,
     )
     pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
-    if is_mac:
-        pipe.enable_attention_slicing()
-    else:
-        pipe.enable_model_cpu_offload()
-        pipe.enable_xformers_memory_efficient_attention()
-    pipe = pipe.to(device)
+    pipe = pipe.to(cfg.device)
+    cfg.set_pipeline_options(pipe)
 
     print("### performing inference with args:")
     print("# args: ", args)
