@@ -26,40 +26,7 @@ def load_image_from_path(path):
     return image
 
 
-def video_to_frames(video_path, output_dir_path):
-    import cv2
-
-    video_cap = cv2.VideoCapture(video_path)
-    success, frame = video_cap.read()
-    count = 0
-    while success:
-        frame_path = f"{output_dir_path}/frame{count}.jpg"
-        cv2.imwrite(frame_path, frame)
-        success, frame = video_cap.read()
-        count += 1
-    print("Done")
-
-
-def frames_to_video(video_path, input_dir_path, frame_num, w=1080, h=1920):
-    import cv2
-
-    frameSize = (w, h)
-    print(frameSize)
-    out = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*"DIVX"), 30, frameSize)
-    for count in range(0, frame_num):
-        frame_path = f"{input_dir_path}/frame{count}.jpg"
-        print(frame_path)
-        img = cv2.imread(frame_path)
-        out.write(img)
-    out.release()
-
-
-def utils(args):
-    video_to_frames(args.video, args.directory)
-    frames_to_video("test.avi", args.directory, 100)
-
-
-def i2t(args):
+def classify(args):
     from transformers import ViTImageProcessor, ViTForImageClassification
 
     if args.image is None:
@@ -77,7 +44,7 @@ def i2t(args):
     print("Predicted class:", model.config.id2label[predicted_class_idx])
 
 
-def i2s(args):
+def segment(args):
     from transformers import SegformerImageProcessor, SegformerForSemanticSegmentation
 
     if args.image is None:
@@ -391,17 +358,17 @@ def main():
     t2i_parser.add_argument( "-o", "--output-path", default=f"output_t2i{utc_time}.png", help="path for image output when generation is complete")
     t2i_parser.set_defaults(func=t2i)
 
-    i2t_parser = subparsers.add_parser("i2t", help="Image classifier")
-    i2t_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
-    i2t_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
-    i2t_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
-    i2t_parser.set_defaults(func=i2t)
+    classify_parser = subparsers.add_parser("classify", help="Image classifier")
+    classify_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
+    classify_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
+    classify_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    classify_parser.set_defaults(func=classify)
 
-    i2s_parser = subparsers.add_parser("i2s", help="Image Seqmentation")
-    i2s_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
-    i2s_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
-    i2s_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
-    i2s_parser.set_defaults(func=i2s)
+    segment_parser = subparsers.add_parser("segment", help="Image Seqmentation")
+    segment_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
+    segment_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
+    segment_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    segment_parser.set_defaults(func=segment)
 
     ip2p_parser = subparsers.add_parser("ip2p", help="the instruct-pix2pix subcommand")
     ip2p_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
@@ -450,16 +417,6 @@ def main():
     t2t_parser.add_argument( "-b", "--top-p", default="1.0", help="If set to float < 1, only the smallest set of most probable tokens with probabilities that add up to top_p or higher are kept for generation", type=float)
     t2t_parser.set_defaults(func=t2t)
     # fmt: on
-
-    # Helper utilities functions
-    utils_parser = subparsers.add_parser("utils", help="Utilities")
-    utils_parser.add_argument(
-        "-v", "--video", default="aictl_video.mp4", help="The video to use"
-    )
-    utils_parser.add_argument(
-        "-d", "--directory", default="working_directory", help="The frames directory"
-    )
-    utils_parser.set_defaults(func=utils)
 
     args = parser.parse_args()
 
