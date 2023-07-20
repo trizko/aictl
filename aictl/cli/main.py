@@ -361,13 +361,13 @@ def main():
     classify_parser = subparsers.add_parser("classify", help="an image classification subcommand")
     classify_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
     classify_parser.add_argument("-i", "--image", default=None, help="the local image file to classify")
-    classify_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    classify_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to classify")
     classify_parser.set_defaults(func=classify)
 
     segment_parser = subparsers.add_parser("segment", help="an image segmentation subcommand")
     segment_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
     segment_parser.add_argument("-i", "--image", default=None, help="the local image file to segment")
-    segment_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    segment_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to segment")
     segment_parser.set_defaults(func=segment)
 
     ip2p_parser = subparsers.add_parser("ip2p", help="the instruct-pix2pix subcommand")
