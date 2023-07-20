@@ -26,6 +26,45 @@ def load_image_from_path(path):
     return image
 
 
+def classify(args):
+    from transformers import ViTImageProcessor, ViTForImageClassification
+
+    if args.image is None:
+        image = download_image(args.image_url)
+    else:
+        image = load_image_from_path(args.image)
+
+    processor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
+    model = ViTForImageClassification.from_pretrained("google/vit-base-patch16-224")
+    inputs = processor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+    logits = outputs.logits
+    # model predicts one of the 1000 ImageNet classes
+    predicted_class_idx = logits.argmax(-1).item()
+    print("Predicted class:", model.config.id2label[predicted_class_idx])
+
+
+def segment(args):
+    from transformers import SegformerImageProcessor, SegformerForSemanticSegmentation
+
+    if args.image is None:
+        image = download_image(args.image_url)
+    else:
+        image = load_image_from_path(args.image)
+
+    processor = SegformerImageProcessor.from_pretrained(
+        "nvidia/segformer-b0-finetuned-ade-512-512"
+    )
+    model = SegformerForSemanticSegmentation.from_pretrained(
+        "nvidia/segformer-b0-finetuned-ade-512-512"
+    )
+    inputs = processor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+    logits = outputs.logits
+    # model predicts one of the 1000 ImageNet classes
+    print(logits)
+
+
 def t2i(args):
     import torch
     from diffusers import StableDiffusionPipeline
@@ -318,6 +357,18 @@ def main():
     t2i_parser.add_argument( "-b", "--batch-size", default="1", help="number of images per generation", type=int)
     t2i_parser.add_argument( "-o", "--output-path", default=f"output_t2i{utc_time}.png", help="path for image output when generation is complete")
     t2i_parser.set_defaults(func=t2i)
+
+    classify_parser = subparsers.add_parser("classify", help="an image classification subcommand")
+    classify_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
+    classify_parser.add_argument("-i", "--image", default=None, help="the local image file to classify")
+    classify_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to classify")
+    classify_parser.set_defaults(func=classify)
+
+    segment_parser = subparsers.add_parser("segment", help="an image segmentation subcommand")
+    segment_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
+    segment_parser.add_argument("-i", "--image", default=None, help="the local image file to segment")
+    segment_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to segment")
+    segment_parser.set_defaults(func=segment)
 
     ip2p_parser = subparsers.add_parser("ip2p", help="the instruct-pix2pix subcommand")
     ip2p_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
