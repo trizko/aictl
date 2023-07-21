@@ -4,6 +4,8 @@ import io
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import torch
 from diffusers import StableDiffusionPipeline, UniPCMultistepScheduler
@@ -27,6 +29,9 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Initialize static file server
+app.mount("/build", StaticFiles(directory="frontend/public/build/"), name="static")
 
 
 # Create a class that will hold our model and lock
@@ -72,12 +77,25 @@ def get_model():
     return model
 
 
+@app.get("/")
+async def read_root():
+    return FileResponse('frontend/public/index.html')
+
+
 @app.get("/health-check/")
 async def health_check():
     return {"status": "OK"}
 
 
-@app.post("/generate/")
+@app.post(
+    "/generate/",
+    responses = {
+        200: {
+            "content": {"image/png": {}}
+        }
+    },
+    response_class=Response
+)
 async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_model)):
     # Get preprocessor, pipeline and lock
     pipe = model_resource.pipeline
