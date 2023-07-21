@@ -116,5 +116,5 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
         logger.info("Inference complete.")
 
         buffer = io.BytesIO()
-        output.images[0].save(buffer, format="JPEG")
-        return {"image": base64.b64encode(buffer.getvalue())}
+        output.images[0].save(buffer, format="PNG")
+        return Response(content=buffer.getvalue(), media_type="image/png")
