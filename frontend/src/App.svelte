@@ -1,5 +1,4 @@
 <script>
-    import Logo from './components/Logo.svelte';
     import Toolbar from './components/Toolbar.svelte';
 </script>
 
@@ -25,8 +24,7 @@
 </style>
 
 <div class="main">
-    <Logo />
-    <div class="flex h-screen flex-col justify-center">
+    <div class="ml-2 mt-2 fixed">
         <Toolbar />
     </div>
 </div>
