@@ -1,6 +1,10 @@
 import asyncio
 import base64
+from datetime import datetime
+import hashlib
 import io
+import os
+import secrets
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +36,9 @@ app.add_middleware(
 
 # Initialize static file server
 app.mount("/build", StaticFiles(directory="frontend/public/build/"), name="static")
+images_path = "./frontend/public/images/"
+if not os.path.exists(images_path):
+    os.mkdir(images_path)
 
 
 # Create a class that will hold our model and lock
@@ -87,15 +94,7 @@ async def health_check():
     return {"status": "OK"}
 
 
-@app.post(
-    "/generate/",
-    responses = {
-        200: {
-            "content": {"image/png": {}}
-        }
-    },
-    response_class=Response
-)
+@app.post("/generate/")
 async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_model)):
     # Get preprocessor, pipeline and lock
     pipe = model_resource.pipeline
@@ -115,6 +114,11 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
         )
         logger.info("Inference complete.")
 
-        buffer = io.BytesIO()
-        output.images[0].save(buffer, format="PNG")
-        return Response(content=buffer.getvalue(), media_type="image/png")
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        random_data = secrets.token_bytes(16)
+        short_hash = hashlib.sha256(random_data).hexdigest()[:5]
+        filename = f"{timestamp}-{short_hash}.png"
+        output.images[0].save(f"frontend/public/images/{filename}")
+        return {
+            "path": f"images/{filename}"
+        }
