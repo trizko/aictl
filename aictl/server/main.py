@@ -86,7 +86,7 @@ def get_model():
 
 @app.get("/")
 async def read_root():
-    return FileResponse('frontend/public/index.html')
+    return FileResponse("frontend/public/index.html")
 
 
 @app.get("/health-check/")
@@ -119,6 +119,4 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
         short_hash = hashlib.sha256(random_data).hexdigest()[:5]
         filename = f"{timestamp}-{short_hash}.png"
         output.images[0].save(f"frontend/public/images/{filename}")
-        return {
-            "path": f"images/{filename}"
-        }
+        return {"path": f"images/{filename}"}
