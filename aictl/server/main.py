@@ -1,14 +1,12 @@
 import asyncio
-import base64
 from datetime import datetime
 import hashlib
-import io
 import os
 import secrets
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 import torch
