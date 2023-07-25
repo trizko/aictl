@@ -107,30 +107,20 @@ def ip2p(args):
     import torch
     from diffusers import StableDiffusionInstructPix2PixPipeline
 
-    # check if on mac and mps is available, fallback to cuda then cpu
-    is_mac = False
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    if torch.backends.mps.is_available():
-        is_mac = True
-        device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
+    # get config for device type
+    cfg = SystemConfig()
 
     # load models and configure pipeline settings
     print("### loading models")
-    model_type = torch.float32 if is_mac else torch.float16
     pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
         args.model,
-        torch_dtype=model_type,
+        torch_dtype=cfg.model_type,
         safety_checker=None,
         requires_safety_checker=False,
     )
     pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
-    if is_mac:
-        pipe.enable_attention_slicing()
-    else:
-        pipe.enable_model_cpu_offload()
-        pipe.enable_xformers_memory_efficient_attention()
-    pipe = pipe.to(device)
+    pipe = pipe.to(cfg.device)
+    cfg.set_pipeline_options(pipe)
 
     if args.image is None:
         image = download_image(args.image_url)
@@ -157,36 +147,26 @@ def t2v(args):
     from diffusers import DiffusionPipeline
     from diffusers.utils import export_to_video
 
-    # check if on mac and mps is available, fallback to cuda then cpu
-    is_mac = False
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    if torch.backends.mps.is_available():
-        # TODO: remove this block of when https://github.com/pytorch/pytorch/pull/99246 is merged
+    # get config for device type
+    cfg = SystemConfig()
+
+    # TODO: remove this block of when https://github.com/pytorch/pytorch/pull/99246 is merged
+    if cfg.device == torch.device("mps"):
         print(
             "ERROR: MPS currently does not support text-to-video pipelines. This will only work when the following PR is merged and released: https://github.com/pytorch/pytorch/pull/99246"
         )
         return
         # TODO END
 
-        is_mac = True
-        device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
-
-    model_type = torch.float32 if is_mac else torch.float16
-    variant = "fp32" if is_mac else "fp16"
+    variant = "fp32" if cfg.device == torch.device("mps") else "fp16"
     pipe = DiffusionPipeline.from_pretrained(
-        args.model, torch_dtype=model_type, variant=variant
+        args.model, torch_dtype=cfg.model_type, variant=variant
     )
 
     # memory optimization
-    if is_mac:
-        pipe.enable_attention_slicing()
-    else:
-        pipe.enable_vae_slicing()
-        pipe.enable_model_cpu_offload()
-        pipe.enable_xformers_memory_efficient_attention()
-    pipe = pipe.to(device)
+    pipe = pipe.to(cfg.device)
 
+    cfg.set_pipeline_options(pipe)
     print(args.prompt)
     video_frames = pipe(args.prompt, num_frames=args.frames).frames
     video_path = export_to_video(video_frames, output_video_path=args.output_path)
@@ -221,17 +201,11 @@ def t2a(args):
 
 
 def upscale(args):
-    import torch
     from RealESRGAN import RealESRGAN
     from diffusers import StableDiffusionUpscalePipeline
 
-    # check if on mac and mps is available, fallback to cuda then cpu
-    is_mac = False
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    if torch.backends.mps.is_available():
-        is_mac = True
-        device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
+    # get config for device type
+    cfg = SystemConfig()
 
     # Get the image
     if args.image is None:
@@ -243,22 +217,17 @@ def upscale(args):
     if args.model == "sdx4":
         # load models and configure pipeline settings
         print("### loading models")
-        model_type = torch.float32 if is_mac else torch.float16
         model_id = "stabilityai/stable-diffusion-x4-upscaler"
         pipe = StableDiffusionUpscalePipeline.from_pretrained(
-            model_id, torch_dtype=model_type
+            model_id, torch_dtype=cfg.model_type
         )
         pipe.scheduler = args.scheduler.from_config(pipe.scheduler.config)
-        if is_mac:
-            pipe.enable_attention_slicing()
-        else:
-            pipe.enable_model_cpu_offload()
-            pipe.enable_xformers_memory_efficient_attention()
-        pipe = pipe.to(device)
+        pipe = pipe.to(cfg.device)
+        cfg.set_pipeline_options(pipe)
         upscaled_image = pipe(prompt=args.prompt, image=image).images[0]
         upscaled_image.save(args.output_path)
     elif args.model == "esrgan":
-        model = RealESRGAN(device, scale=args.scale)
+        model = RealESRGAN(cfg.device, scale=args.scale)
         model.load_weights(f"weights/RealESRGAN_x{args.scale}.pth", download=True)
         upscaled_image = model.predict(image)
         upscaled_image.save(args.output_path)
@@ -266,27 +235,19 @@ def upscale(args):
 
 # Text to Text
 def t2t(args):
-    import torch
     from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-    is_mac = False
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    if torch.backends.mps.is_available():
-        is_mac = True
-        device = torch.device("mps")
-        print("MPS device detected. Using MPS.")
+    # get config for device type
+    cfg = SystemConfig()
 
-    model_type = torch.float32 if is_mac else torch.float16
-    model_id = args.model
-
-    tokenizer = T5Tokenizer.from_pretrained(model_id)
+    tokenizer = T5Tokenizer.from_pretrained(args.model)
     model = T5ForConditionalGeneration.from_pretrained(
-        model_id, device_map="auto", torch_dtype=model_type
+        args.model, device_map="auto", torch_dtype=cfg.model_type
     )
 
     input_text = args.prompt
     print(f"Input: {args.prompt}")
-    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(device)
+    input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to(cfg.device)
     outputs = model.generate(
         input_ids,
         max_new_tokens=args.max_new_tokens,
