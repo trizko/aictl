@@ -315,7 +315,7 @@ def main():
     utc_time = calendar.timegm(today_time.utctimetuple())
 
     # fmt: off
-    t2i_parser = subparsers.add_parser("t2i", help="the text-to-image subcommand")
+    t2i_parser = subparsers.add_parser("t2i", help="a text-to-image subcommand")
     t2i_parser.add_argument( "-m", "--model", default="runwayml/stable-diffusion-v1-5", help="the model id to use")
     t2i_parser.add_argument( "-p", "--prompt", default="a photo of an astronaut riding a horse on mars", help="the prompt to use")
     t2i_parser.add_argument( "-x", "--seed", default="420", help="seed for pinning random generations", type=int)
@@ -341,7 +341,7 @@ def main():
     segment_parser.add_argument("-u","--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to segment")
     segment_parser.set_defaults(func=segment)
 
-    ip2p_parser = subparsers.add_parser("ip2p", help="the instruct-pix2pix subcommand")
+    ip2p_parser = subparsers.add_parser("ip2p", help="an instruct-pix2pix subcommand")
     ip2p_parser.add_argument("-m","--model", default="timbrooks/instruct-pix2pix", help="the model id to use")
     ip2p_parser.add_argument("-p","--prompt", default="turn him into cyborg", help="the instruction prompt to use")
     ip2p_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
@@ -354,21 +354,21 @@ def main():
     ip2p_parser.add_argument("-o","--output-path", default=f"output_ip2p{utc_time}.png", help="path for image output when generation is complete")
     ip2p_parser.set_defaults(func=ip2p)
 
-    t2v_parser = subparsers.add_parser("t2v", help="the text-to-video subcommand")
+    t2v_parser = subparsers.add_parser("t2v", help="a text-to-video subcommand")
     t2v_parser.add_argument("-m","--model", default="damo-vilab/text-to-video-ms-1.7b", help="the model id to use")
     t2v_parser.add_argument("-p", "--prompt", default="Darth Vader surfing a wave", help="the prompt to use")
     t2v_parser.add_argument("-f", "--frames", default="16", help="number of frames generated", type=int)
     t2v_parser.add_argument("-o","--output-path", default=f"output_t2v{utc_time}.mp4", help="the path for video when generation is complete")
     t2v_parser.set_defaults(func=t2v)
 
-    t2a_parser = subparsers.add_parser("t2a", help="the text-to-audio subcommand")
+    t2a_parser = subparsers.add_parser("t2a", help="a text-to-audio subcommand")
     t2a_parser.add_argument("-p", "--prompt", default="Greek folk", help="the prompt to use")
     t2a_parser.add_argument("-m","--model", default="small", help="the MusicGen model to use (options: small, medium, large, melody)")
-    t2a_parser.add_argument("-o","--output-path",default=f"output_t2a{utc_time}", help="the path for audio when generation is complete")
+    t2a_parser.add_argument("-o","--output-path", default=f"output_t2a{utc_time}", help="the path for audio when generation is complete")
     t2a_parser.add_argument("-d", "--duration", default="8", help="how long the audio lasts in seconds")
     t2a_parser.set_defaults(func=t2a)
 
-    upscale_parser = subparsers.add_parser("upscale", help="Upscale an image")
+    upscale_parser = subparsers.add_parser("upscale", help="an image upscaling subcommand")
     upscale_parser.add_argument( "-p", "--prompt", default="", help="the prompt to use, only works with sdx4")
     upscale_parser.add_argument( "-i", "--image", default=None, help="the local image file to edit")
     upscale_parser.add_argument( "-u", "--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
@@ -379,7 +379,7 @@ def main():
     upscale_parser.set_defaults(func=upscale)
     
     # other options for text generation can be found here: https://huggingface.co/docs/transformers/v4.30.0/en/main_classes/text_generation#transformers.GenerationConfig
-    t2t_parser = subparsers.add_parser("t2t", help="Text to Text")
+    t2t_parser = subparsers.add_parser("t2t", help="a text generation subcommand")
     t2t_parser.add_argument( "-p", "--prompt", default="What color is the sky?", help="the prompt to use, ask a question")
     t2t_parser.add_argument( "-m", "--model", default="google/flan-t5-base", help="The model to use")
     t2t_parser.add_argument( "-n", "--max-new-tokens", default="256", help="maximum numbers of tokens to generate (not including prompt)", type=int)

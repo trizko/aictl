@@ -1,9 +1,13 @@
 import asyncio
-import base64
-import io
+from datetime import datetime
+import hashlib
+import os
+import secrets
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import torch
 from diffusers import StableDiffusionPipeline, UniPCMultistepScheduler
@@ -27,6 +31,12 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Initialize static file server
+app.mount("/build", StaticFiles(directory="frontend/public/build/"), name="static")
+images_path = "./frontend/public/images/"
+if not os.path.exists(images_path):
+    os.mkdir(images_path)
 
 
 # Create a class that will hold our model and lock
@@ -72,6 +82,11 @@ def get_model():
     return model
 
 
+@app.get("/")
+async def read_root():
+    return FileResponse("frontend/public/index.html")
+
+
 @app.get("/health-check/")
 async def health_check():
     return {"status": "OK"}
@@ -97,6 +112,9 @@ async def analyze_image(data: T2IConfig, model_resource: Model = Depends(get_mod
         )
         logger.info("Inference complete.")
 
-        buffer = io.BytesIO()
-        output.images[0].save(buffer, format="JPEG")
-        return {"image": base64.b64encode(buffer.getvalue())}
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        random_data = secrets.token_bytes(16)
+        short_hash = hashlib.sha256(random_data).hexdigest()[:5]
+        filename = f"{timestamp}-{short_hash}.png"
+        output.images[0].save(f"frontend/public/images/{filename}")
+        return {"path": f"images/{filename}"}

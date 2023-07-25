@@ -1,5 +1,6 @@
 <script>
-
+    import Logo from "./Logo.svelte";
+    import Prompt from "./Prompt.svelte";
 </script>
 
 <style type='text/postcss'>
@@ -8,6 +9,7 @@
     @tailwind utilities;
 </style>
 
-<div class="bg-gray-500 px-2 py-2 ml-2 fixed inline-block rounded">
-    <input class="py-1 px-1" type="text">
+<div class="flex">
+    <Logo />
+    <Prompt />
 </div>
