@@ -11,7 +11,7 @@
     :global(body) {
         margin: 0;
         padding: 0;
-        background: #c9c9c9ea;
+        background: #dfdfdfea;
         background-size: 150px 150px;
         background-image:
             linear-gradient(to right, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
