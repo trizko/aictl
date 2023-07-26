@@ -9,7 +9,7 @@
     @tailwind utilities;
 </style>
 
-<div class="flex">
+<div class="flex h-10">
     <Logo />
     <Prompt />
 </div>
