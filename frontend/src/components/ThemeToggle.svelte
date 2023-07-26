@@ -1,5 +1,8 @@
 <script>
-  let darkMode = false;
+    let darkMode = true;
+    darkMode
+            ? document.body.classList.add("dark")
+            : document.body.classList.remove("dark");
 
   function handleSwitchDarkMode() {
     darkMode = !darkMode;
