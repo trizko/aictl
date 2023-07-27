@@ -1,6 +1,7 @@
 <script>
     import Toolbar from './components/Toolbar.svelte';
     import ThemeToggle from './components/ThemeToggle.svelte';
+    import Image from './components/Image.svelte';
 </script>
 
 <style type="text/postcss">
@@ -35,3 +36,4 @@
     </div>
 </div>
 <ThemeToggle />
+<Image />
