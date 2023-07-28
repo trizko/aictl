@@ -67,14 +67,19 @@ def segment(args):
 
 def t2i(args):
     import torch
-    from diffusers import StableDiffusionPipeline
+    from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
 
     # get config for device type
     cfg = SystemConfig()
 
+    # set sd pipeline type
+    sd_pipeline_type = StableDiffusionPipeline
+    if args.sdxl:
+        sd_pipeline_type = StableDiffusionXLPipeline
+
     # load models and configure pipeline settings
     print("### loading models")
-    pipe = StableDiffusionPipeline.from_pretrained(
+    pipe = sd_pipeline_type.from_pretrained(
         args.model,
         torch_dtype=cfg.model_type,
         safety_checker=None,
@@ -306,17 +311,18 @@ def main():
 
     # fmt: off
     t2i_parser = subparsers.add_parser("t2i", help="a text-to-image subcommand")
-    t2i_parser.add_argument( "-m", "--model", default="runwayml/stable-diffusion-v1-5", help="the model id to use")
-    t2i_parser.add_argument( "-p", "--prompt", default="a photo of an astronaut riding a horse on mars", help="the prompt to use")
-    t2i_parser.add_argument( "-x", "--seed", default="420", help="seed for pinning random generations", type=int)
-    t2i_parser.add_argument( "-s", "--steps", default="20", help="number of generation steps", type=int)
-    t2i_parser.add_argument( "-n", "--negative-prompt", default="", help="prompt keywords to be excluded")
-    t2i_parser.add_argument( "-y", "--scheduler", default="ddim", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
-    t2i_parser.add_argument( "-r", "--resolution", default="512x512", help="the resolution of the image delimited by an 'x' (e.g. 512x512)", type=resolution_validator)
-    t2i_parser.add_argument( "-c", "--cfg", default="7.5", help="higher values tell the image gen to follow the prompt more closely (default=7.5)", type=float)
-    t2i_parser.add_argument( "-d", "--denoiser", default="0.7", help="modulate the influence of guidance images on the denoising process (default=0.7)", type=float)
-    t2i_parser.add_argument( "-b", "--batch-size", default="1", help="number of images per generation", type=int)
-    t2i_parser.add_argument( "-o", "--output-path", default=f"output_t2i{utc_time}.png", help="path for image output when generation is complete")
+    t2i_parser.add_argument("-m", "--model", default="runwayml/stable-diffusion-v1-5", help="the model id to use")
+    t2i_parser.add_argument("-l", "--sdxl", action="store_true", help="use SDXL model and pipelines instead of SD 1.5")
+    t2i_parser.add_argument("-p", "--prompt", default="a photo of an astronaut riding a horse on mars", help="the prompt to use")
+    t2i_parser.add_argument("-x", "--seed", default="420", help="seed for pinning random generations", type=int)
+    t2i_parser.add_argument("-s", "--steps", default="20", help="number of generation steps", type=int)
+    t2i_parser.add_argument("-n", "--negative-prompt", default="", help="prompt keywords to be excluded")
+    t2i_parser.add_argument("-y", "--scheduler", default="ddim", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
+    t2i_parser.add_argument("-r", "--resolution", default="512x512", help="the resolution of the image delimited by an 'x' (e.g. 512x512)", type=resolution_validator)
+    t2i_parser.add_argument("-c", "--cfg", default="7.5", help="higher values tell the image gen to follow the prompt more closely (default=7.5)", type=float)
+    t2i_parser.add_argument("-d", "--denoiser", default="0.7", help="modulate the influence of guidance images on the denoising process (default=0.7)", type=float)
+    t2i_parser.add_argument("-b", "--batch-size", default="1", help="number of images per generation", type=int)
+    t2i_parser.add_argument("-o", "--output-path", default=f"output_t2i{utc_time}.png", help="path for image output when generation is complete")
     t2i_parser.set_defaults(func=t2i)
 
     classify_parser = subparsers.add_parser("classify", help="an image classification subcommand")
@@ -359,23 +365,23 @@ def main():
     t2a_parser.set_defaults(func=t2a)
 
     upscale_parser = subparsers.add_parser("upscale", help="an image upscaling subcommand")
-    upscale_parser.add_argument( "-p", "--prompt", default="", help="the prompt to use, only works with sdx4")
-    upscale_parser.add_argument( "-i", "--image", default=None, help="the local image file to edit")
-    upscale_parser.add_argument( "-u", "--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
-    upscale_parser.add_argument( "-y", "--scheduler", default="euler", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
-    upscale_parser.add_argument( "-o", "--output-path", default=f"output_upscale{utc_time}.png", help="the path for audio when generation is complete")
-    upscale_parser.add_argument( "-m", "--model", default="esrgan", help="the upscale model (x4) to use (options: esrgan,sdx4)")
-    upscale_parser.add_argument( "-s", "--scale", default="4", help="the scale factor for the upscale", type=int)
+    upscale_parser.add_argument("-p", "--prompt", default="", help="the prompt to use, only works with sdx4")
+    upscale_parser.add_argument("-i", "--image", default=None, help="the local image file to edit")
+    upscale_parser.add_argument("-u", "--image-url", default="https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg", help="the url of the image to edit")
+    upscale_parser.add_argument("-y", "--scheduler", default="euler", help="available schedulers are: lms, ddim, dpm, euler, pndm, ddpm, and eulera", type=scheduler_validator)
+    upscale_parser.add_argument("-o", "--output-path", default=f"output_upscale{utc_time}.png", help="the path for audio when generation is complete")
+    upscale_parser.add_argument("-m", "--model", default="esrgan", help="the upscale model (x4) to use (options: esrgan,sdx4)")
+    upscale_parser.add_argument("-s", "--scale", default="4", help="the scale factor for the upscale", type=int)
     upscale_parser.set_defaults(func=upscale)
     
     # other options for text generation can be found here: https://huggingface.co/docs/transformers/v4.30.0/en/main_classes/text_generation#transformers.GenerationConfig
     t2t_parser = subparsers.add_parser("t2t", help="a text generation subcommand")
-    t2t_parser.add_argument( "-p", "--prompt", default="What color is the sky?", help="the prompt to use, ask a question")
-    t2t_parser.add_argument( "-m", "--model", default="google/flan-t5-base", help="The model to use")
-    t2t_parser.add_argument( "-n", "--max-new-tokens", default="256", help="maximum numbers of tokens to generate (not including prompt)", type=int)
-    t2t_parser.add_argument( "-t", "--temp", default="1.0", help="value used to modulate the next token probabilities.", type=float)
-    t2t_parser.add_argument( "-k", "--top-k", default="50", help="number of highest probability vocabulary tokens to keep for top-k-filtering", type=int)
-    t2t_parser.add_argument( "-b", "--top-p", default="1.0", help="If set to float < 1, only the smallest set of most probable tokens with probabilities that add up to top_p or higher are kept for generation", type=float)
+    t2t_parser.add_argument("-p", "--prompt", default="What color is the sky?", help="the prompt to use, ask a question")
+    t2t_parser.add_argument("-m", "--model", default="google/flan-t5-base", help="The model to use")
+    t2t_parser.add_argument("-n", "--max-new-tokens", default="256", help="maximum numbers of tokens to generate (not including prompt)", type=int)
+    t2t_parser.add_argument("-t", "--temp", default="1.0", help="value used to modulate the next token probabilities.", type=float)
+    t2t_parser.add_argument("-k", "--top-k", default="50", help="number of highest probability vocabulary tokens to keep for top-k-filtering", type=int)
+    t2t_parser.add_argument("-b", "--top-p", default="1.0", help="If set to float < 1, only the smallest set of most probable tokens with probabilities that add up to top_p or higher are kept for generation", type=float)
     t2t_parser.set_defaults(func=t2t)
     # fmt: on
 
