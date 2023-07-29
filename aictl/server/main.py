@@ -33,10 +33,11 @@ app.add_middleware(
 )
 
 # Initialize static file server
-app.mount("/build", StaticFiles(directory="frontend/public/build/"), name="static")
 images_path = "./frontend/public/images/"
 if not os.path.exists(images_path):
     os.mkdir(images_path)
+app.mount("/build", StaticFiles(directory="frontend/public/build/"), name="static")
+app.mount("/images", StaticFiles(directory="frontend/public/images/"), name="images")
 
 
 # Create a class that will hold our model and lock
