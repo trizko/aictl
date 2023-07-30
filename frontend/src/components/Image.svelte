@@ -1,5 +1,11 @@
 <script>
-    export let imageUrl = '';
+    import { dataStore } from '../store.js';
+
+    let imageUrl = '';
+
+    const unsubscribe = dataStore.subscribe(value => {
+        imageUrl = `http://localhost:8000/${value}`;
+    });
 </script>
 
 <style type="text/postcss">
