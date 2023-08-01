@@ -19,8 +19,6 @@
         result = await response.json();
         dataStore.set(result.path);
     }
-
-    generateImage();
 </script>
 
 <style type="text/postcss">
