@@ -4,7 +4,9 @@
     let imageUrl = '';
 
     const unsubscribe = dataStore.subscribe(value => {
-        imageUrl = `http://localhost:8000/${value}`;
+        if (value) {
+            imageUrl = `http://localhost:8000/${value}`;
+        }
     });
 </script>
 
@@ -15,11 +17,11 @@
 </style>
 
 <div class="h-screen w-screen flex justify-center items-center">
-    {#if imageUrl === ''}
+    {#if imageUrl !== ''}
+        <img src={imageUrl} alt="upload or generation from the prompt."/>
+    {:else}
         <span class="dark:text-gray-100 outline-dashed dark:outline-gray-100 h-52 w-72 flex items-center text-center px-10 font-black">
             drag and drop image to upload or generate with prompt
         </span>
-    {:else}
-        <img src={imageUrl} alt="upload or generation from the prompt."/>
     {/if}
 </div>
